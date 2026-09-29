@@ -150,36 +150,6 @@ classDiagram
     HistoryManager ..> CalculatorError
 ```
 
-## Sequence Diagram (Evaluate Expression)
-```mermaid
-sequenceDiagram
-    actor User
-    participant CLI as cli.py
-    participant VAL as validators.py
-    participant EXP as expression.py
-    participant HIS as HistoryManager
-    participant LOG as logger
-    User->>CLI: enter "2 + 3 * (4 - 1)"
-    CLI->>EXP: evaluate(expr)
-    EXP->>VAL: validate_expression(expr)
-    VAL-->>EXP: cleaned expr
-    EXP-->>CLI: 11
-    CLI->>HIS: add(expr, 11)
-    HIS->>HIS: save to JSON
-    CLI->>LOG: log result
-    CLI-->>User: Result = 11
-
-## Storage Design (JSON)
-```mermaid
-erDiagram
-    HISTORY_ENTRY {
-        string timestamp
-        string expression
-        number result
-    }
-```
-`data/history.json` is a list of `HISTORY_ENTRY` objects (max 100).
-
 ## Design Decisions & Rationale
 - **`ast` instead of `eval`:** prevents code injection.
 - **Custom exception hierarchy:** one `except CalculatorError` in the CLI handles every expected failure.
