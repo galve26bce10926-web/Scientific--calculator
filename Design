@@ -1,0 +1,122 @@
+# Design Documentation
+
+Diagrams are written in Mermaid (rendered automatically on GitHub).
+
+## System Architecture
+```mermaid
+flowchart TB
+    U[User] --> CLI[cli.py - Presentation layer]
+    CLI --> V[validators.py]
+    CLI --> OPS[operations.py - Module 1]
+    CLI --> EXP[expression.py - Module 2]
+    CLI --> HIS[history.py - Module 3]
+    EXP --> OPS
+    EXP --> V
+    HIS --> FS[(history.json / CSV)]
+    CLI --> LOG[logger.py]
+    HIS --> LOG
+    LOG --> LF[(calculator.log)]
+    OPS --> EXC[exceptions.py]
+    EXP --> EXC
+    CFG[config.py] -.-> OPS & HIS & LOG
+```
+
+## Workflow Diagram
+```mermaid
+flowchart TD
+    A([Start]) --> B[Show main menu]
+    B --> C{Choice}
+    C -->|1| D[Select operation, enter numbers]
+    C -->|2| E[Enter expression]
+    C -->|3| F[View / Summary / Export / Clear]
+    C -->|4| Z([Exit])
+    D --> G{Valid?}
+    E --> G
+    G -->|No| H[Show error and log it] --> B
+    G -->|Yes| I[Compute result]
+    I --> J[Display and save to history] --> B
+    F --> B
+```
+
+## Use Case Diagram
+```mermaid
+flowchart LR
+    User((User))
+    subgraph Smart Calculator
+    UC1[Perform basic operation]
+    UC2[Evaluate expression]
+    UC3[View history]
+    UC4[View summary]
+    UC5[Export CSV]
+    UC6[Clear history]
+    end
+    User --> UC1 & UC2 & UC3 & UC4 & UC5 & UC6
+```
+
+## Class / Component Diagram
+```mermaid
+classDiagram
+    class HistoryManager {
+        +path
+        +entries
+        +add(expression, result)
+        +get_all()
+        +clear()
+        +save()
+        +load()
+        +export_csv(path)
+        +summary()
+    }
+    class CalculatorError
+    CalculatorError <|-- InvalidInputError
+    CalculatorError <|-- DivisionByZeroError
+    CalculatorError <|-- UnknownOperationError
+    CalculatorError <|-- ExpressionError
+    class Operations {
+        +add() +subtract() +multiply()
+        +divide() +power() +modulus() +square_root()
+    }
+    class ExpressionEvaluator {
+        +evaluate(expr)
+    }
+    ExpressionEvaluator --> Operations
+    HistoryManager ..> CalculatorError
+```
+
+## Sequence Diagram (Evaluate Expression)
+```mermaid
+sequenceDiagram
+    actor User
+    participant CLI as cli.py
+    participant VAL as validators.py
+    participant EXP as expression.py
+    participant HIS as HistoryManager
+    participant LOG as logger
+    User->>CLI: enter "2 + 3 * (4 - 1)"
+    CLI->>EXP: evaluate(expr)
+    EXP->>VAL: validate_expression(expr)
+    VAL-->>EXP: cleaned expr
+    EXP-->>CLI: 11
+    CLI->>HIS: add(expr, 11)
+    HIS->>HIS: save to JSON
+    CLI->>LOG: log result
+    CLI-->>User: Result = 11
+```
+
+## Storage Design (JSON)
+```mermaid
+erDiagram
+    HISTORY_ENTRY {
+        string timestamp
+        string expression
+        number result
+    }
+```
+`data/history.json` is a list of `HISTORY_ENTRY` objects (max 100).
+
+## Design Decisions & Rationale
+- **`ast` instead of `eval`:** prevents code injection.
+- **Custom exception hierarchy:** one `except CalculatorError` in the CLI handles every expected failure.
+- **Operation registry (dict):** adding a new operation needs one function and one registry line.
+- **JSON storage:** human-readable, no database setup needed for a small project.
+- **Layered design:** UI, logic, and storage are separate, so each can be tested alone.
