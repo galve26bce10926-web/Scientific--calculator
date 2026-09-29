@@ -8,11 +8,13 @@ The calculator uses three modules:
 Module 1: Arithmetic operations: + -  / ^ % sqrt
 
 Module 2: Expression evaluator: type 2 + 3 (4 - 1); parsed safely with ast (no eval)
+
 Module 3: History & reports: saved to JSON, summary stats (count / average / min / max), CSV export, clear history
 Various protections: division-by-zero, invalid input, overflow, and unsafe-code
 Logging to logs/calculator.log
 Bounded history (last 100 entries) for resource efficiency.
 The project is implemented in Python 3.9+ (standard library only: ast, math, json, csv, logging, unittest), and uses Git for version control.
+
 ## Non-Functional Requirements Table
 |Category |Implementation|
 |---|---|
@@ -22,9 +24,11 @@ The project is implemented in Python 3.9+ (standard library only: ast, math, jso
 |Maintainability |Small single-purpose modules, docstrings, config constants |
 |Resource efficiency |History capped at 100 entries; exponent and expression length limits |
 |Logging |Every operation and handled error is logged |
+
 ## Technologies Used
 - Python 3.9+ (standard library only: ast, math, json, csv, logging, unittest)
 - Git
+  
 ## Project Structure
 ```
 smart_calculator/
@@ -45,6 +49,7 @@ smart_calculator/
 ├── statement.md
 └── README.md
 ```
+
 ## Installation & Running
 ```bash
 git clone
