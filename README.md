@@ -69,3 +69,83 @@ Enter choice (1-4): 2
 Enter expression: 2 + 3 (4 - 1)
 Result: 2 + 3 (4 - 1) = 11
 ```
+
+## System Architecture
+```mermaid
+flowchart TB
+    U[User] --> CLI[cli.py - Presentation layer]
+    CLI --> V[validators.py]
+    CLI --> OPS[operations.py - Module 1]
+    CLI --> EXP[expression.py - Module 2]
+    CLI --> HIS[history.py - Module 3]
+    EXP --> OPS
+    EXP --> V
+    HIS --> FS[(history.json / CSV)]
+    CLI --> LOG[logger.py]
+    HIS --> LOG
+    LOG --> LF[(calculator.log)]
+    OPS --> EXC[exceptions.py]
+    EXP --> EXC
+    CFG[config.py] -.-> OPS & HIS & LOG
+```
+
+## Workflow Diagram
+```mermaid
+flowchart TD
+    A([Start]) --> B[Show main menu]
+    B --> C{Choice}
+    C -->|1| D[Select operation, enter numbers]
+    C -->|2| E[Enter expression]
+    C -->|3| F[View / Summary / Export / Clear]
+    C -->|4| Z([Exit])
+    D --> G{Valid?}
+    E --> G
+    G -->|No| H[Show error and log it] --> B
+    G -->|Yes| I[Compute result]
+    I --> J[Display and save to history] --> B
+    F --> B
+```
+## Use Case Diagram
+```mermaid
+flowchart LR
+    User((User))
+    subgraph Smart Calculator
+    UC1[Perform basic operation]
+    UC2[Evaluate expression]
+    UC3[View history]
+    UC4[View summary]
+    UC5[Export CSV]
+    UC6[Clear history]
+    end
+    User --> UC1 & UC2 & UC3 & UC4 & UC5 & UC6
+```
+
+## Class / Component Diagram
+```mermaid
+classDiagram
+    class HistoryManager {
+        +path
+        +entries
+        +add(expression, result)
+        +get_all()
+        +clear()
+        +save()
+        +load()
+        +export_csv(path)
+        +summary()
+    }
+    class CalculatorError
+    CalculatorError <|-- InvalidInputError
+    CalculatorError <|-- DivisionByZeroError
+    CalculatorError <|-- UnknownOperationError
+    CalculatorError <|-- ExpressionError
+    class Operations {
+        +add() +subtract() +multiply()
+        +divide() +power() +modulus() +square_root()
+    }
+    class ExpressionEvaluator {
+        +evaluate(expr)
+    }
+    ExpressionEvaluator --> Operations
+    HistoryManager ..> CalculatorError
+```
